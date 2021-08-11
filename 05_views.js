@@ -27,23 +27,18 @@ const intro = magpieViews.view_generator("intro", {
   text: `Hello and a warm welcome to our experiment!
             <br />
             <br />
-            <br />
             You are now taking part in an experiment which is simulating an online game.
+            The experiment will approximately take 5-10 minutes.
             <br />
             <br />
-            Think of you as being an explorer who wants to find the treasure which was hidden by a pirate.
-            You found some maps which could lead you to the treasure but you don't know which is the correct one.
-            <br />
-            Additionally, you will get an evidence map where the treasures might be hidden.
-            <br />
-            Based on this given evidence map you need to decide which treasure map is the correct one.
+            Thank you for participating in our study, we higly appreciate it!
+            Unfortunately, you are allowed to participate only once, so please don't do the study a second time!
             <br />
             <br />
-            But you need to have caution! The evidence map which was given could not only provide helpful, but also uninformative or misleading evidence through strategic selection of points.
+            We will store your data anonymously and you can end the experiment at any time if you would like to quit.
             <br />
             <br />
-            <br />
-            More on this in the following instruction.`,
+            More on the procedure in the following instruction.`,
   buttonText: 'go to the instructions and begin the experiment'
 });
 
@@ -55,28 +50,29 @@ const instructions = magpieViews.view_generator("instructions", {
   text: `Now we will tell you what to do and how this experiment will proceed.
             <br />
             <br />
-            In the beginning there will be some practice trials to make you familiar with the procedure of the study.
+            Think of you as being an explorer who wants to find the treasure which was hidden by pirates.
+            You found some maps which could lead you to the treasure but you don't know which is the correct one.
+            Additionally, you will get an evidence map where the treasures might be hidden.
+            Based on this given evidence map you need to decide which treasure map is the correct one.
             <br />
             <br />
-            As soon as you start the trials you will see a picture showing the evidence map which consists of points which show a subset of the buried treasures.
+            But you need to have caution! The evidence map which was given could not only provide helpful, but also uninformative or misleading evidence through strategic selection of points.
+            There will never be false information provided by the pirates!
             <br />
-            This evidence map was provided by a past player (the pirate who hid the treasures).
+            <br />
+            <br />
+            As soon as you start the trials you will see a picture showing the evidence map which consists of blue points showing a subset of the buried treasures.
+            This evidence map was provided by past players (the pirates who hid the treasures).
+            <br />
             <br />
             There will also be four treasure maps between which you will need to decide.
             Just click on the map which you think would be the correct one.
             <br />
-            Be careful when choosing a treasure map since the pirate could provide helpful, misleading or uninformative evidence!
+            <br />
+            The study will consist of two blocks under different conditions. One condition in which you got help from the pirates (<strong>Teammate condition</strong>) and one where the pirates tried to mislead you (<strong>Opponent condition</strong>).
             <br />
             <br />
-            There will never be false information provided by the pirate!
-            <br />
-            <br />
-            The study will consist of two blocks under different conditions. One condition in which you got help from the pirate (<strong>Teammate condition</strong>) and one where the pirate tried to mislead you (<strong>Opponent condition</strong>).
-            These conditions will consist of 18 trials; therefore, we will show you 36 stimuli in total after you finished the practice trials.
-            <br />
-            <br />
-            <br />
-            Please be aware to answer <strong> as fast as possible </strong>!
+            In the beginning there will be some practice trials to make you familiar with the procedure of the study.
             `,
   buttonText: 'go to the practice trials'
 });
@@ -91,16 +87,12 @@ const intro_practice_1 = magpieViews.view_generator("instructions", {
               The first part will be under the <strong>${coinflip}</strong> condition.
               <br />
               <br />
-              Opponent Group: This means that the pirate who gave you the evidence maps tried to mislead you.
+              Opponent Group: This means that the pirates who gave you the evidence maps tried to mislead you.
               <br />
-              Teammate Group: This means that the pirate wanted to help you with the evidence map to find the treasures.
-              <br />
-              <br />
-              <strong> Important: </strong> The pirate can't provide false information, the evidence maps all fit the correct treasure map!
+              Teammate Group: This means that the pirates wanted to help you with the evidence map to find the treasures.
               <br />
               <br />
-              <br />
-              Please be aware to answer <strong> as fast as possible </strong>!
+              <strong> Important: </strong> The pirates can't provide false information, the evidence maps all fit the correct treasure map!
               `,
   buttonText: 'start the first practice block'
 });
@@ -117,16 +109,12 @@ const intro_practice_2 = magpieViews.view_generator("instructions", {
               The second part will be under the <strong>${get_other_coin(coinflip)}</strong> condition.
               <br />
               <br />
-              Opponent Group: This means that the pirate who gave you the evidence maps tried to mislead you.
+              Opponent Group: This means that the pirates who gave you the evidence maps tried to mislead you.
               <br />
-              Teammate Group: This means that the pirate wanted to help you with the evidence map to find the treasures.
-              <br />
-              <br />
-              <strong> Important: </strong> The pirate can't provide false information, the evidence maps all fit the correct treasure map!
+              Teammate Group: This means that the pirates wanted to help you with the evidence map to find the treasures.
               <br />
               <br />
-              <br />
-              Please be aware to answer <strong> as fast as possible </strong>!
+              <strong> Important: </strong> The pirates can't provide false information, the evidence maps all fit the correct treasure map!
               `,
   buttonText: 'start the second practice block'
 });
@@ -144,14 +132,12 @@ const instructions_firstblock = magpieViews.view_generator("instructions", {
             The first part will be under the <strong>${coinflip}</strong> condition.
             <br />
             <br />
-            Opponent Group: This means that the pirate who gave you the evidence maps tried to mislead you.
+            Opponent Group: This means that the pirates who gave you the evidence maps tried to mislead you.
             <br />
-            Teammate Group: This means that the pirate wanted to help you with the evidence map to find the treasures.
+            Teammate Group: This means that the pirates wanted to help you with the evidence map to find the treasures.
             <br />
             <br />
-            <strong> Important: </strong> The pirate can't provide false information, the evidence maps all fit the correct treasure map!
-            <br />
-            Please be aware to answer <strong> as fast as possible </strong>!
+            <strong> Important: </strong> The pirates can't provide false information, the evidence maps all fit the correct treasure map!
             `,
   buttonText: 'begin the first main block'
 });
@@ -169,14 +155,12 @@ const instructions_secondblock = magpieViews.view_generator("instructions", {
             The second part will be under the <strong>${get_other_coin(coinflip)}</strong> condition.
             <br />
             <br />
-            Opponent Group: This means that the pirate who gave you the evidence maps tried to mislead you.
+            Opponent Group: This means that the pirates who gave you the evidence maps tried to mislead you.
             <br />
-            Teammate Group: This means that the pirate wanted to help you with the evidence map to find the treasures.
+            Teammate Group: This means that the pirates wanted to help you with the evidence map to find the treasures.
             <br />
             <br />
-            <strong> Important: </strong> The pirate can't provide false information, the evidence maps all fit the correct treasure map!
-            <br />
-            Please be aware to answer <strong> as fast as possible </strong>!
+            <strong> Important: </strong> The pirates can't provide false information, the evidence maps all fit the correct treasure map!
             `,
   buttonText: 'begin the second main block'
 });
@@ -254,14 +238,14 @@ const teammate_block_practice = magpieViews.view_generator(
                            <p class='magpie-view-question'>${config.data[CT].evidence}</p>
                            <label for="evidenceimg" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].evidencepic}></label>
                            <p class='magpie-view-question'>${config.data[CT].question}</p>
-                           <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture1}></label>
-                           <input type="radio" name="answer" id="img1" value="${config.data[CT].option1}" />
-                           <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture2}></label>
-                           <input type="radio" name="answer" id="img2" value="${config.data[CT].option2}" />
-                           <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture3}></label>
-                           <input type="radio" name="answer" id="img3" value="${config.data[CT].option3}" />
-                           <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture4}></label>
-                           <input type="radio" name="answer" id="img4" value="${config.data[CT].option4}" />
+                           <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[0][0]}></label>
+                           <input type="radio" name="answer" id="img1" value="${config.data[CT].order[0][1]}" />
+                           <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[1][0]}></label>
+                           <input type="radio" name="answer" id="img2" value="${config.data[CT].order[1][1]}" />
+                           <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[2][0]}></label>
+                           <input type="radio" name="answer" id="img3" value="${config.data[CT].order[2][1]}" />
+                           <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[3][0]}></label>
+                           <input type="radio" name="answer" id="img4" value="${config.data[CT].order[3][1]}" />
                        </div>`;
        },
    },
@@ -283,14 +267,14 @@ const opponent_block_practice = magpieViews.view_generator(
                          <p class='magpie-view-question'>${config.data[CT].evidence}</p>
                          <label for="evidenceimg" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].evidencepic}></label>
                          <p class='magpie-view-question'>${config.data[CT].question}</p>
-                         <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture1}></label>
-                         <input type="radio" name="answer" id="img1" value="${config.data[CT].option1}" />
-                         <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture2}></label>
-                         <input type="radio" name="answer" id="img2" value="${config.data[CT].option2}" />
-                         <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture3}></label>
-                         <input type="radio" name="answer" id="img3" value="${config.data[CT].option3}" />
-                         <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture4}></label>
-                         <input type="radio" name="answer" id="img4" value="${config.data[CT].option4}" />
+                         <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[0][0]}></label>
+                         <input type="radio" name="answer" id="img1" value="${config.data[CT].order[0][1]}" />
+                         <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[1][0]}></label>
+                         <input type="radio" name="answer" id="img2" value="${config.data[CT].order[1][1]}" />
+                         <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[2][0]}></label>
+                         <input type="radio" name="answer" id="img3" value="${config.data[CT].order[2][1]}" />
+                         <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[3][0]}></label>
+                         <input type="radio" name="answer" id="img4" value="${config.data[CT].order[3][1]}" />
                      </div>`;
      },
  },
@@ -312,14 +296,14 @@ const teammate_block_main = magpieViews.view_generator(
                            <p class='magpie-view-question'>${config.data[CT].evidence}</p>
                            <label for="evidenceimg" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].evidencepic}></label>
                            <p class='magpie-view-question'>${config.data[CT].question}</p>
-                           <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture1}></label>
-                           <input type="radio" name="answer" id="img1" value="${config.data[CT].option1}" />
-                           <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture2}></label>
-                           <input type="radio" name="answer" id="img2" value="${config.data[CT].option2}" />
-                           <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture3}></label>
-                           <input type="radio" name="answer" id="img3" value="${config.data[CT].option3}" />
-                           <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture4}></label>
-                           <input type="radio" name="answer" id="img4" value="${config.data[CT].option4}" />
+                           <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[0][0]}></label>
+                           <input type="radio" name="answer" id="img1" value="${config.data[CT].order[0][1]}" />
+                           <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[1][0]}></label>
+                           <input type="radio" name="answer" id="img2" value="${config.data[CT].order[1][1]}" />
+                           <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[2][0]}></label>
+                           <input type="radio" name="answer" id="img3" value="${config.data[CT].order[2][1]}" />
+                           <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[3][0]}></label>
+                           <input type="radio" name="answer" id="img4" value="${config.data[CT].order[3][1]}" />
                        </div>`;
        },
    },
@@ -341,14 +325,14 @@ const opponent_block_main = magpieViews.view_generator(
                          <p class='magpie-view-question'>${config.data[CT].evidence}</p>
                          <label for="evidenceimg" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].evidencepic}></label>
                          <p class='magpie-view-question'>${config.data[CT].question}</p>
-                         <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture1}></label>
-                         <input type="radio" name="answer" id="img1" value="${config.data[CT].option1}" />
-                         <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture2}></label>
-                         <input type="radio" name="answer" id="img2" value="${config.data[CT].option2}" />
-                         <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture3}></label>
-                         <input type="radio" name="answer" id="img3" value="${config.data[CT].option3}" />
-                         <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].picture4}></label>
-                         <input type="radio" name="answer" id="img4" value="${config.data[CT].option4}" />
+                         <label for="img1" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[0][0]}></label>
+                         <input type="radio" name="answer" id="img1" value="${config.data[CT].order[0][1]}" />
+                         <label for="img2" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[1][0]}></label>
+                         <input type="radio" name="answer" id="img2" value="${config.data[CT].order[1][1]}" />
+                         <label for="img3" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[2][0]}></label>
+                         <input type="radio" name="answer" id="img3" value="${config.data[CT].order[2][1]}" />
+                         <label for="img4" class='magpie-view-picture magpie-response-picture'><img src=${config.data[CT].order[3][0]}></label>
+                         <input type="radio" name="answer" id="img4" value="${config.data[CT].order[3][1]}" />
                      </div>`;
      },
  },
