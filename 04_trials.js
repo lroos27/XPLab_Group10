@@ -1,6 +1,8 @@
 // In this file you can specify the trial data for your experiment
 
+// our image selection trials for the practice session
 const image_selection_practice = {
+    // first for the teammate condition
     practice_teammate: [
         {
             condition: "teammate",
@@ -44,7 +46,7 @@ const image_selection_practice = {
         },
 
     ],
-
+    // then for the opponent condition
     practice_opponent: [
         {
             condition: "opponent",
@@ -89,7 +91,9 @@ const image_selection_practice = {
     ],
 };
 
+// our image selection trials for the main task
 const image_selection_trials = {
+    // first for the teammate condition
     image_selection_teammate: [
         {
             condition: "teammate",
@@ -272,7 +276,7 @@ const image_selection_trials = {
             ['study_images/Truth6.png', 'Truth']])
         },
     ],
-
+    // then for the opponent condition
     image_selection_opponent: [
         {
             condition: "opponent",

@@ -1,14 +1,9 @@
 // Here, you can define all custom functions, you want to use and initialize some variables
 
-/* Variables
-*
-*
-*/
-const coin = _.sample(["teammate","opponent"]); // You can determine global (random) parameters here
-// Declare your variables here
+// variable to get a random condition
+const coin = _.sample(["teammate","opponent"]);
 
-
-//Function for getting the other coin!
+// function for getting and storing the other coin/condition
 const get_other_coin = function(coin){
     if(coin == "teammate"){
         return "opponent"
@@ -17,13 +12,6 @@ const get_other_coin = function(coin){
         return "teammate"
     }
 }
-
-
-/* Helper functions
-*
-*
-*/
-
 
 /* For generating random participant IDs */
     // https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
@@ -37,44 +25,3 @@ const generateID = function(len) {
     window.crypto.getRandomValues(arr);
     return Array.from(arr, this.dec2hex).join("");
 };
-// Declare your helper functions here
-
-
-
-/* Hooks
-*
-*
-*/
-
-// Error feedback if participants exceeds the time for responding
-const time_limit = function(data, next) {
-    if (typeof window.timeout === 'undefined'){
-        window.timeout = [];
-    }
-    // Add timeouts to the timeoutarray
-    // Reminds the participant to respond after 5 seconds
-    window.timeout.push(setTimeout(function(){
-          $('#reminder').text('Please answer more quickly!');
-    }, 5000));
-    next();
-};
-
-// compares the chosen answer to the value of `option1`
-check_response = function(data, next) {
-    $('input[name=answer]').on('change', function(e) {
-        if (e.target.value === data.correct) {
-            alert('Your answer is correct! Yey!');
-        } else {
-            alert('Sorry, this answer is incorrect :( The correct answer was ' + data.correct);
-        }
-        next();
-    })
-}
-
-// Declare your hooks here
-
-
-/* Generators for custom view templates, answer container elements and enable response functions
-*
-*
-*/
