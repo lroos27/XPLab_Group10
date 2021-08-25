@@ -20,5 +20,5 @@ This experiment was built using _magpie
 
 Running the experiment:
 
-1. Online Link:
+1. Online Link: xplab-group10.netlify.app
 2. Offline: Clone the repository, run npm install and open index.html
