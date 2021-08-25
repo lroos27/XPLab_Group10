@@ -165,7 +165,7 @@ const post_test = magpieViews.view_generator("post_test", {
   trials: 1,
   name: 'post_test',
   title: 'Additional information',
-  text: 'Answering the following questions is <strong>totally optional</strong>, but your answers will help us analyze our results.'
+  text: 'Answering the following questions is <strong>optional</strong>, but your answers will help us analyze our results.'
 
   // You can change much of what appears here, e.g., to present it in a different language, as follows:
   // buttonText: 'Weiter',
@@ -188,27 +188,6 @@ const thanks = magpieViews.view_generator("thanks", {
   trials: 1,
   name: 'thanks',
   title: 'Thank you for participating!',
-  text: `We highly appreciate that you took part in this experiment!
-        <br />
-        <br />
-        Hopefully, you had some fun during the tasks as well.
-        <br />
-        <br />
-        We know you are probably curious what we will analyze now, if you would like to know the outcome of the study, don't hesitate to contact us!
-        <br />
-        <br />
-        <br />
-        Thanks a lot and have a nice day!
-        <br />
-        <br />
-        Leonie, Niklas, Janina, Janeke
-        <br />
-        <br />
-        lroos@uni-osnabrueck.de
-        nlaasch@uni-osnabrueck.de
-        jklarmann@uni-osnabrueck.de
-        jnemitz@uni-osnabrueck.de
-            `,
   prolificConfirmText: 'press the button to end this session'
 });
 
