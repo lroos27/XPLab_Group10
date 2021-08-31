@@ -1,0 +1,324 @@
+---
+title: "Final-Analysis"
+author: "Janina Klarmann, Janeke Nemitz, Niklas Laasch, Leonie Roos"
+date: "31 08 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, error = F, message = F, warning = F)
+
+```
+
+```{r libraries, include=FALSE, message=FALSE, warning=FALSE}
+
+# package for convenience functions (e.g. ggplot2, dplyr, etc.)
+library(tidyverse)
+
+# package I need to display everything, and no, it is not calles "aida" in my R and no I do not know why
+library(aidar)
+
+# package for Bayesian regression
+library(brms)                                         # Install readr package
+library(dplyr)                                                  # Load dplyr package
+library(plyr)                                                   # Load plyr package
+library(readr) 
+# package to extract HDIs
+library(HDInterval)
+# package for visualization
+library(tidybayes)
+
+# package to visualize
+library(bayesplot)
+
+# parallel execution of Stan code
+options(mc.cores = parallel::detectCores())
+
+# global color scheme / non-optimized
+project_colors = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
+
+# setting theme colors globally
+scale_colour_discrete <- function(...) {
+  scale_colour_manual(..., values = project_colors)
+}
+scale_fill_discrete <- function(...) {
+  scale_fill_manual(..., values = project_colors)
+} 
+
+# nicer global knitr options
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      cache = TRUE, fig.align = 'center')
+```
+
+```{r}
+raw_data <- read_csv('results_284_XP_Lab_final_Group10.csv')
+raw_data
+data <- raw_data
+
+#Preprocess data
+# by removing our outliers
+outliers <- raw_data %>% 
+  group_by(submission_id) %>% 
+  filter(RT < 700) %>% dplyr::count()
+
+outliers <- outliers %>% filter(n >= 3)
+
+colnames(outliers)[2] <- "outlier"
+
+data_preprocessed <- left_join(data, outliers, by="submission_id")
+
+data_preprocessed$outlier[is.na(data_preprocessed$outlier)] <- 0
+
+data <- data_preprocessed %>% filter(outlier < 3)
+head(data)
+```
+```{r}
+#calculate the number of participants, the mean age and count how many are male, female, diverse or did not give an answer
+summary <- data %>%
+  select(gender, age, submission_id) %>%
+  distinct(submission_id, age, gender)
+
+# how many males, females, divers, NA
+summary_gender <- summary %>%
+  count('gender')
+
+age_range <- summary %>% drop_na() %>% summarize(max = max(age), min = min(age))
+
+# the mean age and number of participants
+summary_age <- summary %>%   drop_na() %>%
+summarize(participants = nrow(summary),mean_age = mean(age))
+
+summary_age
+summary_gender
+age_range
+```
+```{r}
+# filter out the practice trials
+# select only the relevant columns
+names(data)[1] <- 'subject_ID'
+tidy_data <- data %>%
+  group_by(condition) %>%
+  filter(trial_name != 'teammate_block_practice' & trial_name != 'opponent_block_practice') %>%
+  select(subject_ID,response, condition, evidencepic)
+```
+```{r}
+# create a new column to store the current evidence in
+# change the values of the pictures to make them more understandable
+working_data <- tidy_data %>%
+      mutate(
+        evidence = case_when(
+          evidencepic %in% str_c("study_images/Helpful", 1:6, ".png") ~ "Helpful",
+          evidencepic %in% str_c("study_images/Uninformative", 1:6, ".png") ~ "Uninformative",
+          evidencepic %in% str_c("study_images/Misleading", 1:6, "_0.png") ~ "Misleading",
+          evidencepic %in% str_c("study_images/Misleading", 1:6, "_50.png") ~ "Misleading",
+          evidencepic %in% str_c("study_images/Misleading", 1:6, "_25.png") ~ "Misleading"
+          ),
+          response = case_when(
+          response %in% str_c("Truth") ~ "Truth",
+          response %in% str_c("Decoy", 1:2) ~ "Decoy",
+          response %in% str_c("Lure") ~ "Lure"
+        ),
+  ) %>%
+  select(subject_ID, response, condition, evidence)
+head(working_data)
+```
+
+```{r}
+# calculate the relative proportion of the responses for plotting
+proportions <- working_data %>%
+  dplyr::count(evidence, response) %>%
+  dplyr::mutate(prop = n/sum(n/3))
+
+#plot the proportions of the answers
+proportions %>%
+  # what we want to display on the axis and as the bars
+  ggplot(aes(x = evidence, y = prop, fill = response)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.4, )+
+  # split the plot by condition
+  facet_wrap(condition ~ ., scales = "free")+
+  # set a max of the y axis 
+  ylim(0, 1)+
+  # additionally name the axis
+  labs(
+    x = "",
+    y = "",
+    title = "Receiver choice in the deception Game"
+  )+ 
+  # display
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+```{r}
+# plot Data for H1-H3 to preview the results and get an intuition about the aquired data
+ggplot(data = proportions, 
+       aes(y = prop, x = condition, color = response, shape = response, group = response)) +
+  geom_point(size = 3, 
+             alpha = 0.2) +
+  #display the different evidences seperately
+  facet_wrap(evidence ~ .)+
+  # connect the values for better display of the data
+  geom_line()+
+  labs(x = "Condition", y = "relative counts",
+       title = "Response depending on the evidence in comparison of the condition")
+
+```
+Right here we can already see that given the helpful evidence it is not in question, which map is chosen. Given the misleading evidence we see that the lure is significantly picked more often with around 90% than in the teammate with 25. 
+```{r}
+# change the reference level for the data Analysis
+# Reference level for our model <-- teammate, misleading, decoy
+working_data_sum <- working_data %>%
+  mutate(
+    condition = factor(condition, levels = c('teammate','opponent')),
+    evidence = factor(evidence, levels = c('Misleading','Uninformative','Helpful')),
+    response = factor(response, levels = c('Decoy','Truth','Lure'))
+  )
+working_data_sum
+# plot our Model
+fit_brms_Suspi <- brm(
+  # predict posterior in terms of condition and evidence, including random effects in subject ID
+  formula = response ~ condition * evidence + (condition * evidence || subject_ID),
+  # specify which data to use to get a better 
+  data = working_data_sum,
+  # logistic regression
+  family = 'categorical',
+  #prior to be able to test the third hypothesis
+  # we were not able to sample priors for the point-hypothesis H3 and are therefore not able to prove or reject our third hypothesis. out of time issues we were not able to find a solution
+  #sample_prior = "yes",
+  # take more than the usual samples (for numerical stability of testing)
+  iter = 2000
+)
+# display the model
+summary(fit_brms_Suspi)
+```
+
+```{r}
+# calculating the posterior odds from our model by hand
+posteriors_cat <- fit_brms_Suspi %>% 
+  spread_draws(b_muTruth_Intercept,
+               b_muLure_Intercept,
+               b_muTruth_conditionopponent,
+               b_muTruth_evidenceUninformative,
+               b_muTruth_evidenceHelpful,
+               `b_muTruth_conditionopponent:evidenceUninformative`,
+               `b_muTruth_conditionopponent:evidenceUninformative`,
+               b_muLure_conditionopponent,
+               `b_muLure_conditionopponent:evidenceHelpful`,
+               `b_muLure_conditionopponent:evidenceUninformative`,
+               b_muLure_evidenceHelpful,
+               b_muLure_evidenceUninformative) %>%
+  # transform into proportion space
+  mutate(
+    # for misleading evidence
+    Decoy_base_misleading = 1 / (1 + exp(b_muLure_Intercept) + exp(b_muTruth_Intercept)),
+    Decoy_teammate_misleading = 1 / (1 + exp(b_muLure_Intercept + b_muLure_conditionopponent * -.5) + exp(b_muTruth_Intercept + b_muTruth_conditionopponent * -.5)),  
+    Decoy_opponent_misleading = 1 / (1 + exp(b_muLure_Intercept + b_muLure_conditionopponent * .5) + exp(b_muTruth_Intercept + b_muTruth_conditionopponent * .5)),
+    
+    Lure_base_misleading = Decoy_base_misleading * (exp(b_muLure_Intercept)),
+    Lure_teammate_misleading = Decoy_teammate_misleading * (exp(b_muLure_Intercept + b_muLure_conditionopponent * -.5)),
+    Lure_opponent_misleading = Decoy_opponent_misleading * (exp(b_muLure_Intercept + b_muLure_conditionopponent * .5)),
+    
+    Truth_base_misleading = Decoy_base_misleading * (exp(b_muTruth_Intercept)),
+    Truth_teammate_misleading = Decoy_teammate_misleading * (exp(b_muTruth_Intercept + b_muTruth_conditionopponent * -.5)),
+    Truth_opponent_misleading = Decoy_opponent_misleading * (exp(b_muTruth_Intercept + b_muTruth_conditionopponent * .5)),
+    
+    # for the helpful evidence
+    Decoy_base_helpful = 1 / (1 + exp(b_muLure_evidenceHelpful) + exp(b_muTruth_evidenceHelpful)),
+    Decoy_teammate_helpful = 1 / (1 + exp(b_muLure_evidenceHelpful + `b_muLure_conditionopponent:evidenceHelpful` * -.5) + exp(b_muTruth_evidenceHelpful + `b_muTruth_conditionopponent:evidenceUninformative` * -.5)),  
+    Decoy_opponent_helpful = 1 / (1 + exp(b_muLure_evidenceHelpful + `b_muLure_conditionopponent:evidenceHelpful` * .5) + exp(b_muTruth_evidenceHelpful + `b_muTruth_conditionopponent:evidenceUninformative` * .5)),
+    
+    Lure_base_helpful = Decoy_base_helpful * (exp(b_muLure_evidenceHelpful)),
+    Lure_teammate_helpful = Decoy_teammate_helpful * (exp(b_muLure_evidenceHelpful + `b_muLure_conditionopponent:evidenceHelpful` * -.5)),
+    Lure_opponent_helpful = Decoy_opponent_helpful * (exp(b_muLure_evidenceHelpful + `b_muLure_conditionopponent:evidenceHelpful` * .5)),
+    
+    Truth_base_helpful = Decoy_base_helpful * (exp(b_muTruth_evidenceHelpful)),
+    Truth_teammate_helpful = Decoy_teammate_helpful * (exp(b_muTruth_evidenceHelpful + `b_muTruth_conditionopponent:evidenceUninformative` * -.5)),
+    Truth_opponent_helpful = Decoy_opponent_helpful * (exp(b_muTruth_evidenceHelpful + `b_muTruth_conditionopponent:evidenceUninformative` * .5)),
+    
+    #for the uninformative evidence
+    Decoy_base_uninformative = 1 / (1 + exp(b_muLure_evidenceUninformative) + exp(b_muTruth_evidenceUninformative)),
+    Decoy_teammate_uninformative = 1 / (1 + exp(b_muLure_evidenceUninformative + `b_muLure_conditionopponent:evidenceUninformative` * -.5) + exp(b_muTruth_evidenceUninformative + `b_muTruth_conditionopponent:evidenceUninformative` * -.5)),  
+    Decoy_opponent_uninformative = 1 / (1 + exp(b_muLure_evidenceUninformative + `b_muLure_conditionopponent:evidenceUninformative` * .5) + exp(b_muTruth_evidenceUninformative + `b_muTruth_conditionopponent:evidenceUninformative` * .5)),
+    
+    Lure_base_uninformative = Decoy_base_uninformative * (exp(b_muLure_evidenceUninformative)),
+    Lure_teammate_uninformative = Decoy_teammate_uninformative * (exp(b_muLure_evidenceUninformative + `b_muLure_conditionopponent:evidenceUninformative` * -.5)),
+    Lure_opponent_uninformative = Decoy_opponent_uninformative * (exp(b_muLure_evidenceUninformative + `b_muLure_conditionopponent:evidenceUninformative` * .5)),
+    
+    Truth_base_uninformative = Decoy_base_uninformative * (exp(b_muTruth_evidenceUninformative)),
+    Truth_teammate_uninformative = Decoy_teammate_uninformative * (exp(b_muTruth_evidenceUninformative + `b_muTruth_conditionopponent:evidenceUninformative` * -.5)),
+    Truth_opponent_uninformative = Decoy_opponent_uninformative * (exp(b_muTruth_evidenceUninformative + `b_muTruth_conditionopponent:evidenceUninformative` * .5)),
+    
+    
+    # calculating the deltas
+    delta_Decoy_misleading = Decoy_opponent_misleading - Decoy_teammate_misleading,
+    delta_Lure_misleading = Lure_opponent_misleading - Lure_teammate_misleading,
+    delta_Truth_misleading = Truth_opponent_misleading - Truth_teammate_misleading,
+    
+    delta_Decoy_helpful = Decoy_opponent_helpful - Decoy_teammate_helpful,
+    delta_Lure_helpful = Lure_opponent_helpful - Lure_teammate_helpful,
+    delta_Truth_helpful = Truth_opponent_helpful - Truth_teammate_helpful,
+    
+    delta_Decoy_uninformative = Decoy_opponent_uninformative - Decoy_teammate_uninformative,
+    delta_Lure_uninformative = Lure_opponent_uninformative - Lure_teammate_uninformative,
+    delta_Truth_uninformative = Truth_opponent_uninformative - Truth_teammate_uninformative) %>% 
+  
+  gather(condition, posterior, -c(1:3)) 
+
+
+```
+
+```{r}
+# generate summary stats from posteriors and prepare to plot
+posteriors_cat_sub <- posteriors_cat %>% 
+  group_by(condition) %>%
+  dplyr::filter(condition %in% c("Decoy_opponent_misleading", "Decoy_teammate_misleading", "Lure_opponent_misleading", "Lure_teammate_misleading", "Truth_opponent_misleading", "Truth_teammate_misleading", "Decoy_opponent_helpful", "Decoy_teammate_helpful", "Lure_opponent_helpful", "Lure_teammate_helpful", "Truth_opponent_helpful", "Truth_teammate_helpful", "Decoy_opponent_uninformative", "Decoy_teammate_uninformative", "Lure_opponent_uninformative", "Lure_teammate_uninformative", "Truth_opponent_uninformative", "Truth_teammate_uninformative")) %>%
+  separate(condition, c("Response", "condition", "evidence"), "_")
+
+
+# Summary statistics and calculating the Highest (Posterior) Density Intervals, grouped by response per evidence for both main conditions
+posteriorsummary <- posteriors_cat_sub %>%
+  group_by(Response, condition, evidence) %>%
+  dplyr::summarise(pred_m = mean(posterior, na.rm = TRUE),
+            pred_low = HDInterval::hdi(posterior, credMass = 0.95)[1],
+            pred_high = HDInterval::hdi(posterior, credMass = 0.95)[2]) 
+
+# plotting the Posterior data 
+ggplot(data = posteriorsummary, aes(y = pred_m, x = condition,
+                        color = Response, fill = Response)) +
+  geom_errorbar(aes(ymin = pred_low, ymax = pred_high), 
+                color = "grey",
+                width = 0.2,
+                position = position_dodge(0.2)) +
+  facet_wrap(evidence~.)+
+  geom_point(size = 2, 
+             position = position_dodge(0.2)) +
+  geom_line(aes(group = Response),
+            position = position_dodge(0.2)) + 
+  labs(y = "estimated proportion",
+       x = "condition",
+       title = "Proportion of Response as a function of condition") +
+  scale_y_continuous(breaks = scales::pretty_breaks()) +
+  theme(
+    legend.position = "right"
+  )
+```
+
+```{r}
+# we have to plot the data and to interpret the hypothesis
+# test H1: Given the misleading evidence, the lure is choosen more often in the teammate condition than in the opponent
+hypothesis(fit_brms_Suspi, "muLure_Intercept - (muLure_Intercept + muLure_conditionopponent) > 0")
+
+```
+As the evidence suggests (Evid. Ratio) we have not sufficient evidence that our hypothesis holds. Also the 95% credible interval does include zero. As we have a directional delta, this suggests, that our hypothesis is rejected.
+
+```{r}
+# test H2: Given the uninformative evidence, the lure is chosen more often in the teammate condition than in the opponent
+hypothesis(fit_brms_Suspi, "(muLure_Intercept + muLure_evidenceUninformative) - (muLure_Intercept + muLure_evidenceUninformative + muLure_conditionopponent + muLure_conditionopponent:evidenceUninformative) > 0")
+```
+As the evidence suggests (Evid.Ratio) we have no evidence that our hypothesis holds. Also the 95% credible interval does include zero. As we have a directional delta, this suggests, that our hypothesis is rejected.
+
+```{r}
+# out of time issues we were not able to find the solution for the problem with our last hypothesis. We wanted to use it as further exploration of the data. So proving that there is evidence that participants are not really suspicious.
+# test H3: Give the misleading evidence, in both condition the lure is chosen equally often. 
+hypothesis(fit_brms_Suspi, "muLure_Intercept - (muLure_Intercept + muLure_conditionopponent) = 0")
+```
